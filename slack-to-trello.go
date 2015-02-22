@@ -4,19 +4,19 @@ import (
 	"appengine"
 	"appengine/urlfetch"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
-  "os"
-  "fmt"
+	"os"
 )
 
 type Config struct {
 	Trello struct {
-		Token  string `json:"token"`
-		Key    string `json:"key"`
-		Lists  map[string]string `json:"lists"`
+		Token string            `json:"token"`
+		Key   string            `json:"key"`
+		Lists map[string]string `json:"lists"`
 	}
 }
 
@@ -32,14 +32,14 @@ type SlackMessage struct {
 }
 
 func GetConfigs() Config {
-  file, _ := os.Open("app.json")
-  decoder := json.NewDecoder(file)
-  configuration := Config{}
-  err := decoder.Decode(&configuration)
-  if err != nil {
-    fmt.Println("error:", err)
-  }
-  fmt.Println(configuration.Trello.Lists)
+	file, _ := os.Open("app.json")
+	decoder := json.NewDecoder(file)
+	configuration := Config{}
+	err := decoder.Decode(&configuration)
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+	fmt.Println(configuration.Trello.Lists)
 	return configuration
 }
 
