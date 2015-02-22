@@ -1,0 +1,4 @@
+[trello]
+token = [the token for your USER on trello]
+key = [your app key for Trello]
+idList = [the ID of the list you want cards added to]
