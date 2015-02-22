@@ -3,19 +3,20 @@ package slacktotrello
 import (
 	"appengine"
 	"appengine/urlfetch"
-	"code.google.com/p/gcfg"
 	"encoding/json"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
+  "os"
+  "fmt"
 )
 
 type Config struct {
 	Trello struct {
-		Token  string
-		Key    string
-		IdList string
+		Token  string `json:"token"`
+		Key    string `json:"key"`
+		Lists  map[string]string `json:"lists"`
 	}
 }
 
@@ -31,12 +32,15 @@ type SlackMessage struct {
 }
 
 func GetConfigs() Config {
-	var cfg Config
-	err := gcfg.ReadFileInto(&cfg, "app.gcfg")
-	if err != nil {
-		log.Fatal(err)
-	}
-	return cfg
+  file, _ := os.Open("app.json")
+  decoder := json.NewDecoder(file)
+  configuration := Config{}
+  err := decoder.Decode(&configuration)
+  if err != nil {
+    fmt.Println("error:", err)
+  }
+  fmt.Println(configuration.Trello.Lists)
+	return configuration
 }
 
 func DecodeSlackMessage(r *http.Request) SlackMessage {
@@ -55,7 +59,7 @@ func PostToTrello(r *http.Request, slack_values SlackMessage, cfg Config) (respo
 		"token":  {string(cfg.Trello.Token)},
 		"key":    {string(cfg.Trello.Key)},
 		"due":    {"null"},
-		"idList": {string.cfg.Trello.IdList},
+		"idList": {string(cfg.Trello.Lists[slack_values.Command])},
 		"name":   {string(slack_values.Text)},
 		"pos":    {"top"}})
 	if err != nil {

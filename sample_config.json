@@ -1,0 +1,12 @@
+{
+  "trello":{
+    "token":"[the token for your USER on trello]",
+    "key": "[your app key for Trello]",
+    "lists":{
+      "icebox":"list_id_for_ice_box",
+      "mvp":"",
+      "doing":"",
+      "bugs":""
+    }
+  }
+}
