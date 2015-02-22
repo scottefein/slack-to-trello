@@ -4,9 +4,9 @@ import (
 	"appengine"
 	"appengine/urlfetch"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
-	"log"
+	//"log"
+	"fmt"
 	"net/http"
 	"net/url"
 	"os"
@@ -44,9 +44,10 @@ func GetConfigs() Config {
 }
 
 func DecodeSlackMessage(r *http.Request) SlackMessage {
+	c := appengine.NewContext(r)
 	err := r.ParseForm()
 	if err != nil {
-		log.Fatal(err)
+		c.Errorf("%v", err)
 	}
 	slack_values := SlackMessage{Token: r.FormValue("token"), TeamId: r.FormValue("team_id"), ChannelId: r.FormValue("channel_id"), ChannelName: r.FormValue("Channel_name"), UserId: r.FormValue("user_id"), UserName: r.FormValue("user_name"), Command: r.FormValue("command"), Text: r.FormValue("text")}
 	return slack_values
@@ -63,23 +64,24 @@ func PostToTrello(r *http.Request, slack_values SlackMessage, cfg Config) (respo
 		"name":   {string(slack_values.Text)},
 		"pos":    {"top"}})
 	if err != nil {
-		log.Fatal(err)
+		c.Criticalf("%v", err)
 	}
 	defer resp.Body.Close()
 	response, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatal(err)
+		c.Criticalf("%v", err)
 	}
 	return response
 }
 
 func SendToTrello(w http.ResponseWriter, r *http.Request) {
+	c := appengine.NewContext(r)
 	slack_values := DecodeSlackMessage(r)
 	cfg := GetConfigs()
 	response := PostToTrello(r, slack_values, cfg)
 	var value map[string]interface{}
 	if err := json.Unmarshal(response, &value); err != nil {
-		log.Fatal(err)
+		c.Errorf("%v", err)
 	}
 	enc := json.NewEncoder(w)
 	enc.Encode(map[string]interface{}{"text": "Added To Trello"})
